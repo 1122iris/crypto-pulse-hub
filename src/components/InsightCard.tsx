@@ -151,15 +151,31 @@ export function InsightCard({
 
       {/* Content */}
       <div className="p-6 space-y-4">
-        {/* AI Analysis */}
-        <div>
-          <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 text-primary" />
-            AI Analysis
-          </h4>
-          <p className="text-muted-foreground leading-relaxed text-sm">
-            {reasoning}
-          </p>
+        {/* AI Analysis - Enhanced */}
+        <div className="relative p-5 rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/15 via-primary/8 to-transparent overflow-hidden shadow-lg shadow-primary/5">
+          {/* Glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/10 opacity-60" />
+          <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 rounded-lg bg-primary/25 ring-2 ring-primary/30">
+                <AlertCircle className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  AI Analysis
+                  <span className="px-2 py-0.5 text-xs font-semibold bg-primary/20 text-primary rounded-full border border-primary/30">
+                    LIVE
+                  </span>
+                </h4>
+                <p className="text-xs text-muted-foreground/80">Social Sentiment Intelligence</p>
+              </div>
+            </div>
+            <p className="text-base text-foreground leading-relaxed font-medium">
+              {reasoning}
+            </p>
+          </div>
         </div>
 
         {/* Metrics Grid */}
