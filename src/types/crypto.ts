@@ -7,7 +7,6 @@ export interface ApiAdvice {
   advice_strength: AdviceStrength;
   reason: string;
   predicted_at: number; // UNIX timestamp in seconds
-  price?: number; // Token price from API
   kline_24h?: unknown | null;
 }
 

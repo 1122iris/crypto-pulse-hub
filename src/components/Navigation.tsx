@@ -62,32 +62,6 @@ export function Navigation({
               >
                 Dashboard
               </NavLink>
-              <NavLink
-                to="/sentiment-trends"
-                className={({ isActive }) =>
-                  cn(
-                    "px-4 py-2 rounded-md text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary/20 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )
-                }
-              >
-                Trends
-              </NavLink>
-              <NavLink
-                to="/influencers"
-                className={({ isActive }) =>
-                  cn(
-                    "px-4 py-2 rounded-md text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary/20 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )
-                }
-              >
-                Influencers
-              </NavLink>
             </nav>
           </div>
 
@@ -126,7 +100,7 @@ export function Navigation({
             to="/"
             className={({ isActive }) =>
               cn(
-                "flex-1 px-3 py-2 rounded-md text-xs font-medium transition-colors text-center",
+                "flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors text-center",
                 isActive
                   ? "bg-primary/20 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -139,7 +113,7 @@ export function Navigation({
             to="/dashboard"
             className={({ isActive }) =>
               cn(
-                "flex-1 px-3 py-2 rounded-md text-xs font-medium transition-colors text-center",
+                "flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors text-center",
                 isActive
                   ? "bg-primary/20 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -147,32 +121,6 @@ export function Navigation({
             }
           >
             Dashboard
-          </NavLink>
-          <NavLink
-            to="/sentiment-trends"
-            className={({ isActive }) =>
-              cn(
-                "flex-1 px-3 py-2 rounded-md text-xs font-medium transition-colors text-center",
-                isActive
-                  ? "bg-primary/20 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              )
-            }
-          >
-            Trends
-          </NavLink>
-          <NavLink
-            to="/influencers"
-            className={({ isActive }) =>
-              cn(
-                "flex-1 px-3 py-2 rounded-md text-xs font-medium transition-colors text-center",
-                isActive
-                  ? "bg-primary/20 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              )
-            }
-          >
-            KOLs
           </NavLink>
         </nav>
       </div>
