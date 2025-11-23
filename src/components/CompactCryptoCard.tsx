@@ -1,7 +1,10 @@
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { useState } from "react";
+import { TrendingUp, TrendingDown, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CryptoData } from "@/types/crypto";
+import { StopLossDialog } from "./StopLossDialog";
 
 interface CompactCryptoCardProps extends CryptoData {}
 
@@ -13,6 +16,7 @@ export function CompactCryptoCard({
   recommendation,
   strength,
 }: CompactCryptoCardProps) {
+  const [showStopLoss, setShowStopLoss] = useState(false);
   const isPositive = change > 0;
 
   const getRecommendationColor = () => {
@@ -102,6 +106,24 @@ export function CompactCryptoCard({
         </span>
         <div className="flex items-center gap-1">{getStrengthDots()}</div>
       </div>
+
+      {/* Stop Loss Button */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full mt-4"
+        onClick={() => setShowStopLoss(true)}
+      >
+        <Settings2 className="h-4 w-4 mr-2" />
+        止盈止损设置
+      </Button>
+
+      <StopLossDialog
+        open={showStopLoss}
+        onOpenChange={setShowStopLoss}
+        symbol={symbol}
+        currentPrice={price}
+      />
     </div>
   );
 }
