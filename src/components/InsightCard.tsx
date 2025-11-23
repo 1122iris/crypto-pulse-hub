@@ -4,10 +4,13 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CryptoData } from "@/types/crypto";
+import { useNavigate } from "react-router-dom";
 
 interface InsightCardProps extends CryptoData {}
 
@@ -25,6 +28,7 @@ export function InsightCard({
   predictedAt,
 }: InsightCardProps) {
   const isPositive = change > 0;
+  const navigate = useNavigate();
 
   const getRecommendationIcon = () => {
     switch (recommendation) {
@@ -211,10 +215,21 @@ export function InsightCard({
           </div>
         </div>
 
-        {/* Timestamp */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border">
-          <Clock className="h-3 w-3" />
-          <span>Predicted at {formatTime(predictedAt)}</span>
+        {/* Timestamp and View Details */}
+        <div className="flex items-center justify-between pt-2 border-t border-border">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>Predicted at {formatTime(predictedAt)}</span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(`/crypto/${symbol}`)}
+            className="text-primary border-primary/50 hover:bg-primary/10"
+          >
+            View Details
+            <ArrowRight className="h-4 w-4 ml-1" />
+          </Button>
         </div>
       </div>
     </div>
