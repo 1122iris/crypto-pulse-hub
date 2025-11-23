@@ -19,8 +19,7 @@ export function useCryptoAdvices() {
 
       // Transform API data to CryptoData format
       const transformed: CryptoData[] = advices.map((advice) => {
-        const mockPrice = MOCK_PRICES[advice.symbol] || {
-          price: 0,
+        const mockData = MOCK_PRICES[advice.symbol] || {
           volume: "N/A",
           marketCap: "N/A",
         };
@@ -28,7 +27,7 @@ export function useCryptoAdvices() {
         return {
           symbol: advice.symbol,
           name: TOKEN_NAMES[advice.symbol] || advice.symbol,
-          price: mockPrice.price,
+          price: advice.price ?? 0, // Use API price, fallback to 0 if not available
           change: generateMockPriceChange(),
           recommendation: advice.advice_action,
           strength: advice.advice_strength,
@@ -37,8 +36,8 @@ export function useCryptoAdvices() {
             advice.advice_action,
             advice.advice_strength
           ),
-          volume: mockPrice.volume,
-          marketCap: mockPrice.marketCap,
+          volume: mockData.volume,
+          marketCap: mockData.marketCap,
           predictedAt: advice.predicted_at,
         };
       });
