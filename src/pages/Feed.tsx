@@ -4,9 +4,25 @@ import { toast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { InsightCard } from "@/components/InsightCard";
 import { useCryptoAdvices } from "@/hooks/useCryptoAdvices";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
+import { useState, useEffect } from "react";
 
 const Feed = () => {
   const { data: cryptoData, isLoading, error, refetch } = useCryptoAdvices();
+  const [showLoading, setShowLoading] = useState(true);
+  const [showContent, setShowContent] = useState(false);
+
+  // Show loading animation for at least 2 seconds on first load
+  useEffect(() => {
+    if (!isLoading && cryptoData) {
+      const timer = setTimeout(() => {
+        setShowLoading(false);
+        // Small delay before showing content for smooth transition
+        setTimeout(() => setShowContent(true), 100);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, cryptoData]);
 
   const handleRefresh = async () => {
     const result = await refetch();
@@ -21,15 +37,9 @@ const Feed = () => {
   // Get last update time from query
   const lastUpdate = cryptoData ? new Date() : null;
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="h-12 w-12 text-primary animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading investment signals...</p>
-        </div>
-      </div>
-    );
+  // Show loading animation on initial load or when still loading
+  if (isLoading || showLoading) {
+    return <LoadingAnimation />;
   }
 
   return (
@@ -75,8 +85,13 @@ const Feed = () => {
           </div>
 
           <div className="space-y-6">
-            {cryptoData.map((crypto) => (
-              <InsightCard key={crypto.symbol} {...crypto} />
+            {cryptoData.map((crypto, index) => (
+              <div
+                key={crypto.symbol}
+                className={`animate-slide-up-fade stagger-${Math.min(index + 1, 5)}`}
+              >
+                <InsightCard {...crypto} />
+              </div>
             ))}
           </div>
         </div>
