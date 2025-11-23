@@ -28,7 +28,7 @@ export function useCryptoAdvices() {
         return {
           symbol: advice.symbol,
           name: TOKEN_NAMES[advice.symbol] || advice.symbol,
-          price: mockPrice.price,
+          price: advice.price ?? 0, // Read from API, default to 0 if not present
           change: generateMockPriceChange(),
           recommendation: advice.advice_action,
           strength: advice.advice_strength,
