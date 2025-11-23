@@ -4,25 +4,10 @@ import { toast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { InsightCard } from "@/components/InsightCard";
 import { useCryptoAdvices } from "@/hooks/useCryptoAdvices";
-import { LoadingAnimation } from "@/components/LoadingAnimation";
-import { useState, useEffect } from "react";
+import cryptoLogo from "@/assets/crypto-logo.png";
 
 const Feed = () => {
   const { data: cryptoData, isLoading, error, refetch } = useCryptoAdvices();
-  const [showLoading, setShowLoading] = useState(true);
-  const [showContent, setShowContent] = useState(false);
-
-  // Show loading animation for at least 2 seconds on first load
-  useEffect(() => {
-    if (!isLoading && cryptoData) {
-      const timer = setTimeout(() => {
-        setShowLoading(false);
-        // Small delay before showing content for smooth transition
-        setTimeout(() => setShowContent(true), 100);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading, cryptoData]);
 
   const handleRefresh = async () => {
     const result = await refetch();
@@ -37,9 +22,15 @@ const Feed = () => {
   // Get last update time from query
   const lastUpdate = cryptoData ? new Date() : null;
 
-  // Show loading animation on initial load or when still loading
-  if (isLoading || showLoading) {
-    return <LoadingAnimation />;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="h-12 w-12 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading investment signals...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -75,11 +66,19 @@ const Feed = () => {
       {/* Main Content - Feed Layout */}
       {!error && cryptoData && cryptoData.length > 0 && (
         <div className="container mx-auto px-6 py-6 max-w-4xl">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-foreground mb-2">
+          {/* Hero Section with Logo */}
+          <div className="mb-8 text-center relative">
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <img 
+                src={cryptoLogo} 
+                alt="Crypto Intelligence" 
+                className="w-16 h-16 object-contain opacity-90"
+              />
+            </div>
+            <h1 className="text-4xl font-bold text-foreground mb-2 bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent">
               Latest Investment Insights
-            </h2>
-            <p className="text-muted-foreground">
+            </h1>
+            <p className="text-muted-foreground text-lg">
               AI-powered recommendations based on social media sentiment analysis
             </p>
           </div>
