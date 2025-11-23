@@ -1,5 +1,5 @@
-import { Bitcoin, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
+import cryptoLogo from "@/assets/crypto-logo.png";
 
 export function LoadingAnimation() {
   const [progress, setProgress] = useState(0);
@@ -39,8 +39,12 @@ export function LoadingAnimation() {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="relative">
               <div className="absolute inset-0 bg-primary/30 rounded-full blur-xl animate-pulse" />
-              <div className="relative p-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/40 animate-spin-slow">
-                <TrendingUp className="w-12 h-12 text-primary" />
+              <div className="relative p-4 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/40 animate-spin-slow">
+                <img 
+                  src={cryptoLogo} 
+                  alt="Crypto Logo" 
+                  className="w-20 h-20 object-contain drop-shadow-[0_0_15px_rgba(50,240,140,0.6)]"
+                />
               </div>
             </div>
           </div>
