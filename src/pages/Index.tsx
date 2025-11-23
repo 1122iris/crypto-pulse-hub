@@ -1,119 +1,141 @@
 import { useState, useEffect } from "react";
-import { CryptoCard, Recommendation, Strength } from "@/components/CryptoCard";
+import { CryptoCard } from "@/components/CryptoCard";
 import { RecommendationPanel } from "@/components/RecommendationPanel";
-import { TrendingUp } from "lucide-react";
-
-interface CryptoData {
-  symbol: string;
-  name: string;
-  price: number;
-  change: number;
-  recommendation: Recommendation;
-  strength: Strength;
-  reasoning: string;
-  sentiment: number;
-  volume: string;
-  marketCap: string;
-}
-
-const MOCK_DATA: CryptoData[] = [
-  {
-    symbol: "BTC",
-    name: "Bitcoin",
-    price: 67245.32,
-    change: 3.24,
-    recommendation: "buy",
-    strength: "high",
-    reasoning:
-      "Strong bullish sentiment detected across major social platforms. Whale accumulation patterns indicate institutional confidence. Technical indicators show sustained momentum above key resistance levels. Twitter mentions up 45% with predominantly positive sentiment. On-chain metrics suggest healthy network activity.",
-    sentiment: 78,
-    volume: "$31.2B",
-    marketCap: "$1.32T",
-  },
-  {
-    symbol: "ETH",
-    name: "Ethereum",
-    price: 3542.89,
-    change: 2.15,
-    recommendation: "buy",
-    strength: "medium",
-    reasoning:
-      "Reddit communities showing increased discussion around upcoming network upgrades. Developer activity remains strong. Social sentiment positive but slightly cautious due to network congestion concerns. Trading volume steady with growing DeFi integration mentions.",
-    sentiment: 65,
-    volume: "$15.8B",
-    marketCap: "$425B",
-  },
-  {
-    symbol: "SOL",
-    name: "Solana",
-    price: 142.67,
-    change: -1.23,
-    recommendation: "hold",
-    strength: "medium",
-    reasoning:
-      "Mixed signals from social media. Strong ecosystem growth mentioned frequently, but recent network stability concerns tempering enthusiasm. Technical analysis suggests consolidation phase. Influencer sentiment divided between bullish long-term and cautious short-term outlook.",
-    sentiment: 52,
-    volume: "$2.4B",
-    marketCap: "$65B",
-  },
-  {
-    symbol: "ADA",
-    name: "Cardano",
-    price: 0.58,
-    change: -2.45,
-    recommendation: "hold",
-    strength: "low",
-    reasoning:
-      "Sentiment weakening on Twitter and Reddit. Development progress updates generating mixed reactions. Price action showing indecision. Recommendation to wait for clearer signals before taking position. Community discussions focusing on competitor comparison.",
-    sentiment: 45,
-    volume: "$385M",
-    marketCap: "$20.4B",
-  },
-  {
-    symbol: "DOGE",
-    name: "Dogecoin",
-    price: 0.15,
-    change: -4.67,
-    recommendation: "sell",
-    strength: "high",
-    reasoning:
-      "Sharp decline in social media engagement. Influencer mentions dropping significantly. Technical breakdown below support levels. Sentiment analysis shows growing negative bias. Meme-driven momentum fading with no fundamental catalysts on horizon.",
-    sentiment: 28,
-    volume: "$842M",
-    marketCap: "$21.5B",
-  },
-];
+import { TrendingUp, AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+import { fetchLatestAdvices, ApiError } from "@/lib/api";
+import { CryptoData, TOKEN_NAMES } from "@/types/crypto";
+import {
+  MOCK_PRICES,
+  generateMockPriceChange,
+  calculateSentiment,
+} from "@/lib/mockPrices";
 
 const Index = () => {
-  const [selectedCrypto, setSelectedCrypto] = useState<CryptoData>(MOCK_DATA[0]);
-  const [cryptoData, setCryptoData] = useState<CryptoData[]>(MOCK_DATA);
+  const [cryptoData, setCryptoData] = useState<CryptoData[]>([]);
+  const [selectedCrypto, setSelectedCrypto] = useState<CryptoData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-  // Simulate real-time updates
+  // Load data from API
+  const loadAdvices = async (showToast = false) => {
+    try {
+      setIsRefreshing(true);
+      setError(null);
+
+      const advices = await fetchLatestAdvices();
+
+      if (advices.length === 0) {
+        setError("No investment advice available. Please check backend data.");
+        setCryptoData([]);
+        setSelectedCrypto(null);
+        return;
+      }
+
+      // Transform API data to CryptoData format
+      const transformed: CryptoData[] = advices.map((advice) => {
+        const mockPrice = MOCK_PRICES[advice.symbol] || {
+          price: 0,
+          volume: "N/A",
+          marketCap: "N/A",
+        };
+
+        return {
+          symbol: advice.symbol,
+          name: TOKEN_NAMES[advice.symbol] || advice.symbol,
+          price: mockPrice.price,
+          change: generateMockPriceChange(),
+          recommendation: advice.advice_action,
+          strength: advice.advice_strength,
+          reasoning: advice.reason,
+          sentiment: calculateSentiment(
+            advice.advice_action,
+            advice.advice_strength
+          ),
+          volume: mockPrice.volume,
+          marketCap: mockPrice.marketCap,
+          predictedAt: advice.predicted_at,
+        };
+      });
+
+      setCryptoData(transformed);
+      
+      // Auto-select first crypto if none selected
+      if (!selectedCrypto || !transformed.find(c => c.symbol === selectedCrypto.symbol)) {
+        setSelectedCrypto(transformed[0]);
+      }
+
+      setLastUpdate(new Date());
+
+      if (showToast) {
+        toast({
+          title: "Data refreshed",
+          description: `Loaded ${transformed.length} investment signals`,
+        });
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof ApiError
+          ? err.message
+          : "Failed to load investment advice";
+
+      setError(errorMessage);
+      console.error("Failed to fetch advices:", err);
+
+      if (showToast) {
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    loadAdvices();
+  }, []);
+
+  // Auto-refresh every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCryptoData((prev) =>
-        prev.map((crypto) => ({
-          ...crypto,
-          price: crypto.price * (1 + (Math.random() - 0.5) * 0.002),
-          change: crypto.change + (Math.random() - 0.5) * 0.2,
-          sentiment: Math.max(
-            0,
-            Math.min(100, crypto.sentiment + (Math.random() - 0.5) * 2)
-          ),
-        }))
-      );
-    }, 5000);
+      loadAdvices();
+    }, 30000);
 
     return () => clearInterval(interval);
   }, []);
 
   // Update selected crypto when data changes
   useEffect(() => {
-    const updated = cryptoData.find((c) => c.symbol === selectedCrypto.symbol);
-    if (updated) {
-      setSelectedCrypto(updated);
+    if (selectedCrypto) {
+      const updated = cryptoData.find((c) => c.symbol === selectedCrypto.symbol);
+      if (updated) {
+        setSelectedCrypto(updated);
+      }
     }
-  }, [cryptoData, selectedCrypto.symbol]);
+  }, [cryptoData]);
+
+  const handleRefresh = () => {
+    loadAdvices(true);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="h-12 w-12 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading investment signals...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -134,48 +156,102 @@ const Index = () => {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-sm text-muted-foreground">Live</span>
+            
+            <div className="flex items-center gap-4">
+              {lastUpdate && (
+                <div className="text-xs text-muted-foreground hidden sm:block">
+                  Updated: {lastUpdate.toLocaleTimeString()}
+                </div>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="gap-2"
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </Button>
+              {!error && cryptoData.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-sm text-muted-foreground">Live</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Panel - Crypto List */}
-          <div className="lg:col-span-1 space-y-4">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-foreground mb-1">
-                Top Signals
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Real-time recommendations from social sentiment
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              {cryptoData.map((crypto) => (
-                <CryptoCard
-                  key={crypto.symbol}
-                  {...crypto}
-                  isSelected={selectedCrypto.symbol === crypto.symbol}
-                  onClick={() => setSelectedCrypto(crypto)}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Right Panel - Detailed View */}
-          <div className="lg:col-span-2">
-            <div className="rounded-lg border border-border bg-card overflow-hidden h-full shadow-lg">
-              <RecommendationPanel {...selectedCrypto} />
+      {/* Error State */}
+      {error && (
+        <div className="container mx-auto px-6 py-6">
+          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 flex items-start gap-4">
+            <AlertCircle className="h-6 w-6 text-destructive flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground mb-1">
+                Connection Error
+              </h3>
+              <p className="text-sm text-muted-foreground mb-3">{error}</p>
+              <Button onClick={handleRefresh} size="sm" variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Try Again
+              </Button>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Main Content */}
+      {!error && cryptoData.length > 0 && (
+        <div className="container mx-auto px-6 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Panel - Crypto List */}
+            <div className="lg:col-span-1 space-y-4">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-foreground mb-1">
+                  Latest Signals
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {cryptoData.length} active recommendations
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {cryptoData.map((crypto) => (
+                  <CryptoCard
+                    key={crypto.symbol}
+                    {...crypto}
+                    isSelected={selectedCrypto?.symbol === crypto.symbol}
+                    onClick={() => setSelectedCrypto(crypto)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Right Panel - Detailed View */}
+            <div className="lg:col-span-2">
+              {selectedCrypto ? (
+                <div className="rounded-lg border border-border bg-card overflow-hidden h-full shadow-lg">
+                  <RecommendationPanel {...selectedCrypto} />
+                </div>
+              ) : (
+                <div className="rounded-lg border border-border bg-card p-12 flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">
+                      Select a token to view details
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
