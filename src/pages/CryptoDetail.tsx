@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, TrendingUp, ExternalLink, BarChart3, Users, Shield } from "lucide-react";
+import { ArrowLeft, TrendingUp, ExternalLink, BarChart3, Users, Shield, Twitter, MessageCircle, Heart, Repeat2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCryptoAdvices } from "@/hooks/useCryptoAdvices";
@@ -25,6 +25,57 @@ const FAKE_SOCIAL_METRICS = {
   topInfluencers: ["@CryptoWhale", "@BlockchainBoss", "@Web3Guru"],
   trendingScore: 87,
 };
+
+const FAKE_SOCIAL_POSTS = (symbol: string) => [
+  {
+    author: "CZ 🔶 BN",
+    handle: "@cz_binance",
+    avatar: "👤",
+    content: `${symbol} is showing strong fundamentals. The community growth is impressive. Always DYOR, but the metrics look promising. 🚀`,
+    likes: "24.5K",
+    retweets: "8.3K",
+    replies: "3.2K",
+    time: "2h ago",
+    url: "https://twitter.com/cz_binance/status/fake123456789",
+    verified: true,
+  },
+  {
+    author: "Vitalik.eth",
+    handle: "@VitalikButerin",
+    avatar: "👤",
+    content: `Interesting developments in the ${symbol} ecosystem. The technical architecture is sound and scalability improvements are notable. Looking forward to seeing how this evolves.`,
+    likes: "18.2K",
+    retweets: "5.7K",
+    replies: "2.1K",
+    time: "5h ago",
+    url: "https://twitter.com/VitalikButerin/status/fake987654321",
+    verified: true,
+  },
+  {
+    author: "Crypto Rover",
+    handle: "@rovercrc",
+    avatar: "👤",
+    content: `JUST IN: ${symbol} whale activity detected! 🐋\n\n• 3 large transactions in past hour\n• Total volume: $47M\n• Accumulation pattern forming\n\nThis is HUGE! 📈 #Crypto #${symbol}`,
+    likes: "12.8K",
+    retweets: "4.2K",
+    replies: "1.8K",
+    time: "8h ago",
+    url: "https://twitter.com/rovercrc/status/fake456789123",
+    verified: true,
+  },
+  {
+    author: "Crypto Wendy O",
+    handle: "@CryptoWendyO",
+    avatar: "👤",
+    content: `My ${symbol} analysis:\n\n✅ Strong support at current levels\n✅ RSI showing bullish divergence\n✅ Social sentiment at ATH\n✅ Institutional interest growing\n\nNFA but looking good! 💎🙌`,
+    likes: "9.4K",
+    retweets: "2.9K",
+    replies: "1.3K",
+    time: "12h ago",
+    url: "https://twitter.com/CryptoWendyO/status/fake789123456",
+    verified: false,
+  },
+];
 
 export default function CryptoDetail() {
   const { symbol } = useParams<{ symbol: string }>();
@@ -187,18 +238,69 @@ export default function CryptoDetail() {
                     </span>
                   </div>
                 </div>
-                <div>
-                  <span className="text-muted-foreground block mb-2">
-                    Top Influencers Discussing:
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {FAKE_SOCIAL_METRICS.topInfluencers.map((influencer) => (
-                      <Badge key={influencer} variant="outline">
-                        {influencer}
-                      </Badge>
-                    ))}
+              </div>
+            </div>
+
+            {/* Trending Posts */}
+            <div className="rounded-lg border border-border bg-card p-6">
+              <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <Twitter className="h-5 w-5 text-primary" />
+                Trending Posts
+              </h2>
+              <div className="space-y-4">
+                {FAKE_SOCIAL_POSTS(crypto.symbol).map((post, index) => (
+                  <div
+                    key={index}
+                    className="p-4 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                  >
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="text-2xl">{post.avatar}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-bold text-foreground">
+                            {post.author}
+                          </span>
+                          {post.verified && (
+                            <span className="text-primary text-sm">✓</span>
+                          )}
+                          <span className="text-muted-foreground text-sm">
+                            {post.handle}
+                          </span>
+                          <span className="text-muted-foreground text-sm">
+                            • {post.time}
+                          </span>
+                        </div>
+                        <p className="text-foreground text-sm leading-relaxed mb-3">
+                          {post.content}
+                        </p>
+                        <div className="flex items-center gap-6 text-muted-foreground text-sm">
+                          <div className="flex items-center gap-1 hover:text-primary cursor-pointer">
+                            <MessageCircle className="h-4 w-4" />
+                            <span>{post.replies}</span>
+                          </div>
+                          <div className="flex items-center gap-1 hover:text-primary cursor-pointer">
+                            <Repeat2 className="h-4 w-4" />
+                            <span>{post.retweets}</span>
+                          </div>
+                          <div className="flex items-center gap-1 hover:text-destructive cursor-pointer">
+                            <Heart className="h-4 w-4" />
+                            <span>{post.likes}</span>
+                          </div>
+                          <a
+                            href={post.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 hover:text-primary ml-auto"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            <span>View on X</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
