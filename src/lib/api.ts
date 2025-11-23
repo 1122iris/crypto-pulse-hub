@@ -29,10 +29,10 @@ export async function fetchLatestAdvices(): Promise<ApiAdvice[]> {
     if (!response.ok) {
       if (response.status === 500) {
         const errorData = await response.json().catch(() => ({}));
-        throw new ApiError(
-          errorData.message || "Internal server error",
-          response.status
-        );
+        const errorMsg = errorData.message 
+          ? `Backend Error: ${errorData.message}` 
+          : "Backend returned 500 Internal Server Error. Please check backend logs.";
+        throw new ApiError(errorMsg, response.status);
       }
       throw new ApiError(`HTTP ${response.status}`, response.status);
     }
